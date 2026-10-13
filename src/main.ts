@@ -24,11 +24,28 @@ const cellCenter = (index: number) => index * CELL + CELL / 2;
 const collectedEl = document.querySelector<HTMLOutputElement>('#collected')!;
 const totalEl = document.querySelector<HTMLElement>('#total')!;
 const restartButton = document.querySelector<HTMLButtonElement>('#restart')!;
+const hintsButton = document.querySelector<HTMLButtonElement>('#hints')!;
 
 function renderCounter(collected: number) {
   collectedEl.textContent = String(collected);
   totalEl.textContent = `/${ITEM_COUNT}`;
 }
+
+// Whether valid moves are drawn when the knight is selected. Remembered per browser;
+// storage can be unavailable (private mode, blocked site data), so fall back to "on".
+const HINTS_KEY = 'six-by-six:hints';
+let showHints = (() => {
+  try {
+    return localStorage.getItem(HINTS_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+})();
+
+function renderHintsToggle() {
+  hintsButton.setAttribute('aria-checked', String(showHints));
+}
+renderHintsToggle();
 
 class BoardScene extends Phaser.Scene {
   private knight!: Phaser.GameObjects.Text;
@@ -86,7 +103,9 @@ class BoardScene extends Phaser.Scene {
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => this.onTap(pointer));
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       const square = this.squareAt(pointer);
-      const tappable = square !== null && (sameSquare(square, this.knightSquare) || this.isTarget(square));
+      // With hints off, a pointer cursor over valid squares would give the moves away.
+      const tappable =
+        square !== null && (sameSquare(square, this.knightSquare) || (showHints && this.isTarget(square)));
       this.input.setDefaultCursor(tappable ? 'pointer' : 'default');
     });
   }
@@ -118,11 +137,21 @@ class BoardScene extends Phaser.Scene {
 
   private select() {
     this.selected = true;
+    // Always computed: they decide which taps are legal, whether or not they're drawn.
     this.targets = knightMoves(this.knightSquare);
+    this.drawHighlights();
+  }
 
+  /** Draws the selected square, plus the valid moves when hints are on. */
+  drawHighlights() {
+    // Guard for a toggle tap that lands while the scene is restarting.
+    if (!this.highlights?.scene) return;
     this.highlights.clear();
+    if (!this.selected) return;
+
     this.highlights.fillStyle(SELECTED, 0.6);
     this.highlights.fillRect(this.knightSquare.col * CELL, this.knightSquare.row * CELL, CELL, CELL);
+    if (!showHints) return;
 
     for (const square of this.targets) {
       const x = cellCenter(square.col);
@@ -195,4 +224,16 @@ const game = new Phaser.Game({
 
 restartButton.addEventListener('click', () => {
   game.scene.getScene('board')?.scene.restart();
+});
+
+hintsButton.addEventListener('click', () => {
+  showHints = !showHints;
+  renderHintsToggle();
+  try {
+    localStorage.setItem(HINTS_KEY, showHints ? 'on' : 'off');
+  } catch {
+    // Storage unavailable: the switch still works, it just won't be remembered.
+  }
+  // Redraw straight away, so flipping it with the knight selected shows or hides the moves.
+  (game.scene.getScene('board') as BoardScene | null)?.drawHighlights();
 });
