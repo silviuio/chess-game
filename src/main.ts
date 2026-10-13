@@ -29,7 +29,7 @@ const KNIGHT_START: Square = { row: 3, col: 2 };
 const KNIGHT_GLYPH = '♞︎';
 const BOARD_LABEL =
   'Six by six chessboard with a white knight. Each round, five orange coins appear; ' +
-  'tap the knight, then a valid square, to move onto them.';
+  'tap a square the knight can reach to move it there.';
 
 const cellCenter = (index: number) => index * CELL + CELL / 2;
 const $ = <T extends HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
@@ -105,7 +105,7 @@ function showResult(roundCentis: number[]) {
 
 // --- Hints switch ------------------------------------------------------------
 
-// Whether valid moves are drawn when the knight is selected. Remembered per browser;
+// Whether the knight's valid moves are drawn. Remembered per browser;
 // storage can be unavailable (private mode, blocked site data), so fall back to "on".
 const HINTS_KEY = 'six-by-six:hints';
 let showHints = (() => {
@@ -192,10 +192,7 @@ class BoardScene extends Phaser.Scene {
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       const square = this.squareAt(pointer);
       // With hints off, a pointer cursor over valid squares would give the moves away.
-      const tappable =
-        this.phase === 'playing' &&
-        square !== null &&
-        (sameSquare(square, this.knightSquare) || (showHints && this.isTarget(square)));
+      const tappable = this.phase === 'playing' && showHints && square !== null && this.isTarget(square);
       this.input.setDefaultCursor(tappable ? 'pointer' : 'default');
     });
   }
@@ -220,6 +217,7 @@ class BoardScene extends Phaser.Scene {
     this.knight.setVisible(true);
     this.spawnItems();
     this.phase = 'playing';
+    this.select(); // after spawning, so hint rings are drawn around the new coins
     stopwatch.reset();
     stopwatch.start();
     renderTimer();
@@ -257,21 +255,14 @@ class BoardScene extends Phaser.Scene {
     return this.targets.some((target) => sameSquare(target, square));
   }
 
+  /** The knight stays selected all round: a valid square moves it, any other tap is ignored. */
   private onTap(pointer: Phaser.Input.Pointer) {
     if (this.phase !== 'playing' || this.moving) return;
     const square = this.squareAt(pointer);
-    if (!square) return;
-
-    if (sameSquare(square, this.knightSquare)) {
-      if (this.selected) this.deselect();
-      else this.select();
-    } else if (this.isTarget(square)) {
-      this.moveKnightTo(square);
-    } else {
-      this.deselect();
-    }
+    if (square && this.isTarget(square)) this.moveKnightTo(square);
   }
 
+  /** Selects the knight on its current square: highlights it and works out its valid moves. */
   private select() {
     this.selected = true;
     // Always computed: they decide which taps are legal, whether or not they're drawn.
@@ -334,6 +325,9 @@ class BoardScene extends Phaser.Scene {
         this.collectAt(square);
         // Scene clock: cancelled automatically if the player restarts in the meantime.
         if (finishing) this.time.delayedCall(ROUND_END_DELAY_MS, () => this.endRound());
+        // Re-select on landing, so the next move is a single tap. After collectAt, so a
+        // just-taken coin no longer gets a ring.
+        else this.select();
       },
     });
   }
@@ -415,6 +409,6 @@ hintsButton.addEventListener('click', () => {
   } catch {
     // Storage unavailable: the switch still works, it just won't be remembered.
   }
-  // Redraw straight away, so flipping it with the knight selected shows or hides the moves.
+  // Redraw straight away, so flipping it mid-round shows or hides the moves immediately.
   boardScene()?.drawHighlights();
 });
