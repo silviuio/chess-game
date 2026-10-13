@@ -1,0 +1,36 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; width: 100%; height: 100%; overflow: hidden;
+  background: #171c19; color: #f1eddf;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+body {
+  height: 100svh; display: grid;
+  grid-template-columns: minmax(0, 1fr); place-items: center;
+  padding: max(20px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+}
+main { width: 100%; min-width: 0; text-align: center; }
+header { margin-bottom: 24px; }
+.eyebrow { font-size: 10px; letter-spacing: 3px; color: #a9b4a8; }
+h1 { font-weight: 500; letter-spacing: -2px; font-size: 38px; margin: 8px 0 0; }
+h1 span { color: #9cab89; }
+#board {
+  position: relative;
+  width: min(480px, 100%, calc(100svh - 210px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+  aspect-ratio: 1; margin: auto; border-radius: 2px;
+  box-shadow: 0 0 0 6px #303c32, 0 18px 55px #0004;
+}
+#board canvas {
+  position: absolute; inset: 0; display: block;
+  width: 100% !important; height: 100% !important; margin: 0 !important;
+}
+footer { margin-top: 24px; font-size: 11px; letter-spacing: 2px; color: #a9b4a8; }
+footer span { padding: 0 12px; }
+@media (max-height: 500px) {
+  body { padding-top: 12px; padding-bottom: 12px; }
+  header { margin-bottom: 16px; }
+  .eyebrow { display: none; }
+  h1 { font-size: 24px; margin: 0; }
+  #board { width: min(480px, 100%, calc(100svh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
+  footer { margin-top: 16px; }
+}

@@ -1,0 +1,23 @@
+/* Header HUD: collected counter + restart button. Loaded after style.css. */
+header {
+  position: relative;
+  max-width: 480px; /* matches the board's max width, so the button lines up with its edge */
+  margin-inline: auto;
+}
+.counter { font-variant-numeric: tabular-nums; }
+.restart {
+  position: absolute; right: 0; bottom: 0;
+  width: 44px; height: 44px; padding: 0;
+  display: grid; place-items: center;
+  border: 1px solid #303c32; border-radius: 50%;
+  background: #1f2621; color: #f1eddf;
+  cursor: pointer; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.restart:hover { background: #283029; }
+.restart:active { transform: scale(0.94); }
+.restart:focus-visible { outline: 2px solid #9cab89; outline-offset: 2px; }
+.restart svg { display: block; }
+@media (max-height: 500px) {
+  .restart { width: 36px; height: 36px; }
+}
