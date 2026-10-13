@@ -1,13 +1,15 @@
-/* Header HUD: hints switch, collected counter, restart button. Loaded after style.css. */
+/* Header HUD: hints switch, collected counter, restart button, timer; result dialog.
+   Loaded after style.css. */
 header {
-  position: relative;
   max-width: 480px; /* matches the board's max width, so the buttons line up with its edges */
   margin-inline: auto;
 }
+/* Counter row: the buttons are centred vertically on the counter. */
+.hud { position: relative; }
 .counter { font-variant-numeric: tabular-nums; }
 
 .restart, .hints {
-  position: absolute; bottom: 0;
+  position: absolute; top: 0; bottom: 0; margin-block: auto;
   height: 44px;
   border: 1px solid #303c32;
   background: #1f2621; color: #f1eddf;
@@ -64,4 +66,60 @@ header {
 }
 @media (prefers-reduced-motion: reduce) {
   .hints .track, .hints .thumb { transition: none; }
+}
+
+/* Run timer, under the counter. Muted until the first move, bright while running,
+   accent green once stopped. */
+.timer {
+  margin-top: 4px;
+  font-size: 15px; letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  color: #a9b4a8;
+}
+.timer[data-state="running"] { color: #f1eddf; }
+.timer[data-state="stopped"] { color: #9cab89; }
+
+/* The timer row makes the header ~22px taller; reserve that space in the board's height cap. */
+#board { width: min(480px, 100%, calc(100svh - 232px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
+@media (max-height: 500px) {
+  .timer { margin-top: 2px; font-size: 13px; }
+  #board { width: min(480px, 100%, calc(100svh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
+}
+
+/* Result dialog (native <dialog>: modal, focus-trapped, Esc closes). */
+.result {
+  width: min(320px, calc(100% - 48px));
+  padding: 28px 24px 24px;
+  border: 1px solid #303c32; border-radius: 16px;
+  background: #1f2621; color: #f1eddf;
+  text-align: center;
+  box-shadow: 0 24px 64px #0008;
+}
+.result::backdrop { background: rgb(10 13 11 / 0.6); backdrop-filter: blur(2px); }
+.result[open] { animation: result-in 0.2s ease-out; }
+@keyframes result-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+.result-title {
+  margin: 0;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: #a9b4a8;
+}
+.result-time {
+  margin: 10px 0 24px;
+  font-size: 48px; font-weight: 500; letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+}
+.result-restart {
+  width: 100%; height: 48px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border: 0; border-radius: 24px;
+  background: #f1eddf; color: #171c19;
+  font: inherit; font-size: 15px; font-weight: 600;
+  cursor: pointer; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.result-restart:hover { background: #ffffff; }
+.result-restart:active { transform: scale(0.97); }
+.result-restart:focus-visible { outline: 2px solid #9cab89; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .result[open] { animation: none; }
 }

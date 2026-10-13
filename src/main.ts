@@ -4,6 +4,7 @@ import './hud.css';
 import { BOARD_SIZE, sameSquare, squareKey, type Square } from './board';
 import { knightMoves } from './knight';
 import { randomSquares } from './items';
+import { Stopwatch, formatTime } from './stopwatch';
 
 const CELL = 100;
 const LIGHT = 0xeee8d5;
@@ -13,6 +14,8 @@ const MOVE_HINT = 0x1b211d;
 const ITEM_FILL = 0xf28c28;
 const ITEM_RIM = 0xb4600f;
 const ITEM_COUNT = 5;
+// Lets the last item's pop animation finish before the result dialog covers the board.
+const RESULT_DELAY_MS = 320;
 
 // A 6×6 board has no single centre square; c3 is one of the four central ones.
 const KNIGHT_START: Square = { row: 3, col: 2 };
@@ -25,10 +28,28 @@ const collectedEl = document.querySelector<HTMLOutputElement>('#collected')!;
 const totalEl = document.querySelector<HTMLElement>('#total')!;
 const restartButton = document.querySelector<HTMLButtonElement>('#restart')!;
 const hintsButton = document.querySelector<HTMLButtonElement>('#hints')!;
+const timerEl = document.querySelector<HTMLElement>('#timer')!;
+const resultDialog = document.querySelector<HTMLDialogElement>('#result')!;
+const resultTitle = document.querySelector<HTMLElement>('#result-title')!;
+const resultTime = document.querySelector<HTMLOutputElement>('#result-time')!;
+const resultRestart = document.querySelector<HTMLButtonElement>('#result-restart')!;
 
 function renderCounter(collected: number) {
   collectedEl.textContent = String(collected);
   totalEl.textContent = `/${ITEM_COUNT}`;
+}
+
+const stopwatch = new Stopwatch();
+
+function renderTimer() {
+  timerEl.textContent = formatTime(stopwatch.elapsed());
+  timerEl.dataset.state = stopwatch.state;
+}
+
+function showResult() {
+  resultTitle.textContent = `All ${ITEM_COUNT} collected`;
+  resultTime.textContent = formatTime(stopwatch.elapsed(), 2);
+  resultDialog.showModal();
 }
 
 // Whether valid moves are drawn when the knight is selected. Remembered per browser;
@@ -56,6 +77,8 @@ class BoardScene extends Phaser.Scene {
   private targets: Square[] = [];
   private moving = false;
   private collected = 0;
+  /** Set on the move that takes the last item; the board ignores taps until restart. */
+  private finished = false;
 
   constructor() {
     super('board');
@@ -69,7 +92,10 @@ class BoardScene extends Phaser.Scene {
     this.targets = [];
     this.moving = false;
     this.collected = 0;
+    this.finished = false;
     renderCounter(0);
+    stopwatch.reset();
+    renderTimer();
 
     const board = this.add.graphics();
     for (let row = 0; row < BOARD_SIZE; row++) {
@@ -105,9 +131,16 @@ class BoardScene extends Phaser.Scene {
       const square = this.squareAt(pointer);
       // With hints off, a pointer cursor over valid squares would give the moves away.
       const tappable =
-        square !== null && (sameSquare(square, this.knightSquare) || (showHints && this.isTarget(square)));
+        !this.finished &&
+        square !== null &&
+        (sameSquare(square, this.knightSquare) || (showHints && this.isTarget(square)));
       this.input.setDefaultCursor(tappable ? 'pointer' : 'default');
     });
+  }
+
+  update() {
+    // Phaser already redraws every frame; piggyback on that to tick the HUD clock.
+    if (stopwatch.state === 'running') renderTimer();
   }
 
   private squareAt(pointer: Phaser.Input.Pointer): Square | null {
@@ -121,7 +154,7 @@ class BoardScene extends Phaser.Scene {
   }
 
   private onTap(pointer: Phaser.Input.Pointer) {
-    if (this.moving) return;
+    if (this.moving || this.finished) return;
     const square = this.squareAt(pointer);
     if (!square) return;
 
@@ -174,6 +207,16 @@ class BoardScene extends Phaser.Scene {
   }
 
   private moveKnightTo(square: Square) {
+    // Both ends of the run are timed at the tap, so the move animation isn't counted.
+    const tappedAt = performance.now();
+    stopwatch.start(tappedAt);
+    const finishing = this.items.size === 1 && this.items.has(squareKey(square));
+    if (finishing) {
+      stopwatch.stop(tappedAt);
+      renderTimer();
+      this.finished = true;
+    }
+
     this.deselect();
     this.knightSquare = square;
     this.moving = true;
@@ -186,6 +229,8 @@ class BoardScene extends Phaser.Scene {
       onComplete: () => {
         this.moving = false;
         this.collectAt(square);
+        // Scene clock: cancelled automatically if the player restarts in the meantime.
+        if (finishing) this.time.delayedCall(RESULT_DELAY_MS, showResult);
       },
     });
   }
@@ -222,9 +267,13 @@ const game = new Phaser.Game({
   audio: { noAudio: true },
 });
 
-restartButton.addEventListener('click', () => {
+function restartGame() {
+  if (resultDialog.open) resultDialog.close();
   game.scene.getScene('board')?.scene.restart();
-});
+}
+
+restartButton.addEventListener('click', restartGame);
+resultRestart.addEventListener('click', restartGame);
 
 hintsButton.addEventListener('click', () => {
   showHints = !showHints;
