@@ -1,4 +1,4 @@
-/* Header HUD: hints switch, collected counter, restart button, timer; result dialog.
+/* Header HUD (hints switch, round counter, restart button, timer), board overlays and results dialog.
    Loaded after style.css. */
 header {
   max-width: 480px; /* matches the board's max width, so the buttons line up with its edges */
@@ -86,29 +86,8 @@ header {
   #board { width: min(480px, 100%, calc(100svh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
 }
 
-/* Result dialog (native <dialog>: modal, focus-trapped, Esc closes). */
-.result {
-  width: min(320px, calc(100% - 48px));
-  padding: 28px 24px 24px;
-  border: 1px solid #303c32; border-radius: 16px;
-  background: #1f2621; color: #f1eddf;
-  text-align: center;
-  box-shadow: 0 24px 64px #0008;
-}
-.result::backdrop { background: rgb(10 13 11 / 0.6); backdrop-filter: blur(2px); }
-.result[open] { animation: result-in 0.2s ease-out; }
-@keyframes result-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
-.result-title {
-  margin: 0;
-  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-  color: #a9b4a8;
-}
-.result-time {
-  margin: 10px 0 24px;
-  font-size: 48px; font-weight: 500; letter-spacing: -2px;
-  font-variant-numeric: tabular-nums;
-}
-.result-restart {
+/* Shared primary action: Start, and Restart in the results dialog. */
+.primary-button {
   width: 100%; height: 48px;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   border: 0; border-radius: 24px;
@@ -117,9 +96,91 @@ header {
   cursor: pointer; touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-.result-restart:hover { background: #ffffff; }
-.result-restart:active { transform: scale(0.97); }
-.result-restart:focus-visible { outline: 2px solid #9cab89; outline-offset: 3px; }
+.primary-button:hover { background: #ffffff; }
+.primary-button:active { transform: scale(0.97); }
+.primary-button:focus-visible { outline: 2px solid #9cab89; outline-offset: 3px; }
+
+/* Overlays on the board: Start screen and the between-rounds banner. Above the canvas. */
+.overlay {
+  position: absolute; inset: 0; z-index: 1;
+  display: grid; place-content: center; justify-items: center;
+  padding: 24px;
+  /* Opaque enough that the knight on c3, right under the text, doesn't show through. */
+  background: rgb(23 28 25 / 0.88);
+  text-align: center;
+}
+.overlay[hidden] { display: none; }
+.overlay-eyebrow {
+  margin: 0;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: #a9b4a8;
+}
+.overlay-text {
+  max-width: 230px; margin: 10px 0 20px;
+  font-size: 15px; line-height: 1.4; color: #f1eddf;
+}
+#start .primary-button { width: 200px; }
+.banner { background: rgb(23 28 25 / 0.86); }
+.banner:not([hidden]) { animation: fade-in 0.15s ease-out; }
+.banner-title {
+  margin: 0;
+  font-size: 40px; font-weight: 500; letter-spacing: -1.5px; color: #f1eddf;
+}
+.banner-detail {
+  margin: 6px 0 0;
+  font-size: 13px; letter-spacing: 1px; color: #9cab89;
+  font-variant-numeric: tabular-nums;
+}
+@keyframes fade-in { from { opacity: 0; } }
+
+/* Results dialog (native <dialog>: modal, focus-trapped, Esc closes). */
+.result {
+  width: min(320px, calc(100% - 48px));
+  padding: 24px 24px 20px;
+  border: 1px solid #303c32; border-radius: 16px;
+  background: #1f2621; color: #f1eddf;
+  text-align: center;
+  box-shadow: 0 24px 64px #0008;
+}
+.result::backdrop { background: rgb(10 13 11 / 0.6); backdrop-filter: blur(2px); }
+.result[open] { animation: result-in 0.2s ease-out; }
+@keyframes result-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+.result-title, .result-total-label {
+  margin: 0;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: #a9b4a8;
+}
+.result-rounds { list-style: none; margin: 14px 0 0; padding: 0; text-align: left; }
+.result-rounds li {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 2px;
+  border-bottom: 1px solid #2a332c;
+  font-size: 15px;
+}
+.result-rounds .name { color: #a9b4a8; }
+.result-rounds .time { margin-left: auto; font-variant-numeric: tabular-nums; }
+.result-rounds .best .time { color: #9cab89; }
+.best-tag {
+  padding: 2px 6px; border-radius: 4px;
+  background: #9cab89; color: #171c19;
+  font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+}
+.result-total-label { margin-top: 18px; }
+.result-time {
+  margin: 2px 0 20px;
+  font-size: 44px; font-weight: 500; letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-height: 500px) {
+  .result { padding: 14px 20px; }
+  .result-rounds { margin-top: 8px; }
+  .result-rounds li { padding: 3px 2px; font-size: 13px; }
+  .result-total-label { margin-top: 8px; }
+  .result-time { margin: 0 0 10px; font-size: 30px; }
+  .result .primary-button { height: 40px; }
+  .overlay-text { margin: 6px 0 12px; font-size: 13px; }
+  .banner-title { font-size: 30px; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .result[open] { animation: none; }
+  .result[open], .banner:not([hidden]) { animation: none; }
 }

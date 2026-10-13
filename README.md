@@ -1,8 +1,16 @@
 # Six by Six
 
-A responsive 6×6 chessboard built with Phaser 4, TypeScript and Vite. Move the knight (tap it, then tap a highlighted square) to collect 5 orange items placed on random squares. The counter at the top tracks progress; the button at the top right restarts with a fresh layout. The **Hints** switch at the top left shows or hides the knight's valid moves (moves stay legal either way), and the choice is remembered per browser.
+A responsive 6×6 knight game built with Phaser 4, TypeScript and Vite.
 
-A timer under the counter starts on the first move and stops on the move that takes the last item; a dialog then shows the final time (to the hundredth) with a Restart button.
+## How it plays
+
+- Press **Start**. The game is **5 rounds**; each round places 5 orange coins on random squares and puts the knight back on c3.
+- Move the knight (tap it, then tap a valid square) onto every coin. The coins only appear when a round starts, and that round's clock starts with them, so there's no planning ahead of the clock.
+- The round's clock stops on the tap that takes its last coin. A short "Round N" banner (not timed) leads into the next round.
+- The header shows the current round (`1/5`) and the current round's time.
+- After round 5, a dialog lists each round's time (fastest marked **Best**) and the **total**, which is the final score. Round times are kept in whole hundredths, so the list adds up exactly to the total.
+- **Restart** (top right, or in the dialog) returns to the Start screen.
+- The **Hints** switch (top left) shows or hides the knight's valid moves; moves stay legal either way, and the choice is remembered per browser.
 
 ## Run
 
