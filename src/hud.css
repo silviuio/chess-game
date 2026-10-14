@@ -79,11 +79,12 @@ header {
 .timer[data-state="running"] { color: #f1eddf; }
 .timer[data-state="stopped"] { color: #9cab89; }
 
-/* The timer row makes the header ~22px taller; reserve that space in the board's height cap. */
-#board { width: min(480px, 100%, calc(100svh - 232px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
+/* Board height cap = viewport minus everything else on screen: body padding + header
+   (with the timer row), plus ~40px slack. There's no footer, so that space goes to the board. */
+#board { width: min(480px, 100%, calc(100svh - 195px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
 @media (max-height: 500px) {
   .timer { margin-top: 2px; font-size: 13px; }
-  #board { width: min(480px, 100%, calc(100svh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
+  #board { width: min(480px, 100%, calc(100svh - 111px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
 }
 
 /* Shared primary action: Start, and Restart in the results dialog. */

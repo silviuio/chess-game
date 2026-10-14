@@ -10,7 +10,7 @@ A responsive 6×6 knight game built with Phaser 4, TypeScript and Vite.
 - The header shows the current round (`1/5`) and the current round's time.
 - After round 5, a dialog lists each round's time (fastest marked **Best**) and the **total**, which is the final score. Round times are kept in whole hundredths, so the list adds up exactly to the total.
 - **Restart** (top right, or in the dialog) returns to the Start screen.
-- The **Hints** switch (top left) shows or hides the knight's valid moves; moves stay legal either way, and the choice is remembered per browser.
+- The **Hints** switch (top left) shows or hides the knight's valid moves. It's off by default; moves stay legal either way, and the choice is remembered per browser.
 
 ## Run
 

@@ -24,13 +24,10 @@ h1 span { color: #9cab89; }
   position: absolute; inset: 0; display: block;
   width: 100% !important; height: 100% !important; margin: 0 !important;
 }
-footer { margin-top: 24px; font-size: 11px; letter-spacing: 2px; color: #a9b4a8; }
-footer span { padding: 0 12px; }
 @media (max-height: 500px) {
   body { padding-top: 12px; padding-bottom: 12px; }
   header { margin-bottom: 16px; }
   .eyebrow { display: none; }
   h1 { font-size: 24px; margin: 0; }
   #board { width: min(480px, 100%, calc(100svh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
-  footer { margin-top: 16px; }
 }

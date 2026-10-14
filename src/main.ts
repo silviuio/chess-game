@@ -105,14 +105,15 @@ function showResult(roundCentis: number[]) {
 
 // --- Hints switch ------------------------------------------------------------
 
-// Whether the knight's valid moves are drawn. Remembered per browser;
-// storage can be unavailable (private mode, blocked site data), so fall back to "on".
+// Whether the knight's valid moves are drawn. Off unless the player has switched it on;
+// remembered per browser. Storage can be unavailable (private mode, blocked site data),
+// in which case it simply starts off.
 const HINTS_KEY = 'six-by-six:hints';
 let showHints = (() => {
   try {
-    return localStorage.getItem(HINTS_KEY) !== 'off';
+    return localStorage.getItem(HINTS_KEY) === 'on';
   } catch {
-    return true;
+    return false;
   }
 })();
 

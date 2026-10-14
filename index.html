@@ -11,7 +11,7 @@
       <header>
         <span class="eyebrow">ROUND</span>
         <div class="hud">
-          <button id="hints" class="hints" type="button" role="switch" aria-checked="true" title="Show the knight's valid moves"><span class="track" aria-hidden="true"><span class="thumb"></span></span><span class="label">Hints</span></button>
+          <button id="hints" class="hints" type="button" role="switch" aria-checked="false" title="Show the knight's valid moves"><span class="track" aria-hidden="true"><span class="thumb"></span></span><span class="label">Hints</span></button>
           <h1 class="counter" aria-label="Round"><output id="round" aria-live="polite">1</output><span id="round-total">/5</span></h1>
           <button id="restart" class="restart" type="button" aria-label="Restart"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95L19 9"/><path d="M19 4v5h-5"/></svg></button>
         </div>
@@ -29,8 +29,6 @@
           <p id="banner-detail" class="banner-detail"></p>
         </div>
       </div>
-
-      <footer>6 × 6 <span>·</span> 36 squares</footer>
     </main>
 
     <dialog id="result" class="result" aria-labelledby="result-title">
